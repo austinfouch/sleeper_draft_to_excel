@@ -80,14 +80,21 @@ def main():
   user_drafts = get_all_user_drafts(user, 2020)
 
   print("Writing draft data to '" + path + "'...")
+  sheetname = 'sleeper_draft_data'
+  df = pd.DataFrame(columns=['pick_no','round', 'name', 'team', 'position'])
+  
   for draft in user_drafts:
-    if draft['draft_id'] not in book.sheetnames:
-        df = pd.DataFrame(draft['draft_picks'])
-        df = df[['pick_no','round', 'name', 'team', 'position']]
-        df.to_excel(writer, index=False, sheet_name=draft['draft_id'])
-        book[str(draft['draft_id'])].column_dimensions['c'].width = 30
-    
+    df = df.append(draft['draft_picks'], ignore_index=True)
+  
+  if sheetname in book.sheetnames:
+    book.remove(book[sheetname])
+
+  df.to_excel(writer, index=False, sheet_name=sheetname)
+  book[sheetname].column_dimensions['c'].width = 30
+  book[sheetname].column_dimensions['e'].width = 20
+
   writer.save()
   writer.close()
+  
   print("Complete")
 main()
